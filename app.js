@@ -1,72 +1,62 @@
+/** * Nexus To-Do: Web3 Version
+ * Logic: Connect Wallet -> Call Contract -> Sign Transaction -> Chain Update
+ */
+
 let web3;
-let todoContract;
-const contractAddress = "YOUR_SMART_CONTRACT_ADDRESS_HERE"; 
-const abi = [ /* PASTE BRYAN'S CONTRACT ABI HERE */ ];
+let contract;
+const contractAddress = "0x..."; // From Bryan
+const abi = [...]; // From Bryan
 
-const connectBtn = document.getElementById('connectBtn');
-const addBtn = document.getElementById('addBtn');
-const taskInput = document.getElementById('taskInput');
-const taskList = document.getElementById('taskList');
-const walletAddress = document.getElementById('walletAddress');
-
-// 1. Initialize Web3 and Connect Wallet
-async function init() {
+// Web3 Connection
+async function connectWallet() {
     if (window.ethereum) {
         web3 = new Web3(window.ethereum);
-        
-        connectBtn.onclick = async () => {
+        try {
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            walletAddress.innerText = `Connected: ${accounts[0].substring(0,6)}...${accounts[0].slice(-4)}`;
+            document.getElementById('connectBtn').innerHTML = `<span>${accounts[0].substring(0,6)}...</span>`;
+            document.getElementById('network-status').innerText = "Mainnet/Testnet";
             
-            // Connect to Bryan's Smart Contract
-            todoContract = new web3.eth.Contract(abi, contractAddress);
-            renderTasks();
-        };
-    } else {
-        alert("Please install MetaMask to use this To-Do App!");
+            contract = new web3.eth.Contract(abi, contractAddress);
+            loadBlockchainTasks();
+        } catch (err) {
+            console.error("User denied account access");
+        }
     }
 }
 
-// 2. Add Task (Write to Blockchain)
-addBtn.onclick = async () => {
+// Add Task (Writing to Blockchain)
+async function addTask() {
     const content = taskInput.value;
-    if (!content) return;
-
     const accounts = await web3.eth.getAccounts();
     
-    // Logic: Calls the "createTask" function in Bryan's Solidity code
-    await todoContract.methods.createTask(content).send({ from: accounts[0] });
+    showError("Transaction pending... Please check MetaMask.");
     
-    taskInput.value = "";
-    renderTasks(); // Refresh list
-};
-
-// 3. Toggle Task Completion (Update Blockchain)
-async function toggleTask(id) {
-    const accounts = await web3.eth.getAccounts();
-    await todoContract.methods.toggleCompleted(id).send({ from: accounts[0] });
-    renderTasks();
-}
-
-// 4. Render Tasks (Read from Blockchain)
-async function renderTasks() {
-    taskList.innerHTML = "Loading tasks from blockchain...";
-    const taskCount = await todoContract.methods.taskCount().call();
-    taskList.innerHTML = "";
-
-    for (let i = 1; i <= taskCount; i++) {
-        const task = await todoContract.methods.tasks(i).call();
-        const id = task[0];
-        const content = task[1];
-        const completed = task[2];
-
-        const taskElement = document.createElement('li');
-        taskElement.innerHTML = `
-            <span class="${completed ? 'completed' : ''}">${content}</span>
-            <button onclick="toggleTask(${id})">${completed ? 'Undo' : 'Done'}</button>
-        `;
-        taskList.appendChild(taskElement);
+    try {
+        // We call Bryan's "createTask" function
+        await contract.methods.createTask(content).send({ from: accounts[0] });
+        showError("");
+        loadBlockchainTasks();
+    } catch (err) {
+        showError("Transaction failed or rejected.");
     }
 }
 
-init();
+// Load Tasks (Reading from Blockchain)
+async function loadBlockchainTasks() {
+    const taskCount = await contract.methods.taskCount().call();
+    tasks = []; // Reset local array
+    
+    for (let i = 1; i <= taskCount; i++) {
+        const task = await contract.methods.tasks(i).call();
+        tasks.push({
+            id: task.id,
+            content: task.content,
+            completed: task.completed
+        });
+    }
+    renderApp(); // Reuse the UI engine from Phase 1
+}
+
+// Initial Hook
+document.getElementById('connectBtn').addEventListener('click', connectWallet);
+document.getElementById('addBtn').addEventListener('click', addTask);

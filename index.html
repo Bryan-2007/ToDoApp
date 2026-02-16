@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus To-Do | Web3 Ready</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="glass-background"></div>
+
+    <main class="app-card">
+        <header>
+            <div class="brand">
+                <div class="logo-icon"><i class="fas fa-cubes"></i></div>
+                <div>
+                    <h1>To Do DAPP</h1>
+                    <span id="network-status" class="status-badge">Local Mode</span>
+                </div>
+            </div>
+            <button id="connectBtn" class="primary-btn">
+                <i class="fas fa-wallet"></i> <span>Connect Wallet</span>
+            </button>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-item">
+                <span class="label">Total Tasks</span>
+                <span id="totalCount" class="value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">Completion</span>
+                <div class="progress-container">
+                    <div id="progressBar" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <span id="percentComplete" class="value">0%</span>
+            </div>
+        </section>
+
+        <section class="input-wrapper">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="Enter a task (e.g., Deploy Smart Contract)..." maxlength="50">
+                <button id="addBtn" title="Add Task">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <p id="errorMessage" class="error-text"></p>
+        </section>
+
+        <nav class="filter-nav">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+        </nav>
+
+        <section class="list-container">
+            <ul id="taskList">
+                </ul>
+            
+            <div id="emptyState" class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <p>Your workspace is clear.</p>
+                <span>Add a task to get started.</span>
+            </div>
+        </section>
+
+        <footer>
+            <p>Project Developer: Bryan, Beni, Dani, Abhi</p>
+            <div class="user-info">
+                <i class="fas fa-shield-halved"></i> 
+                <span id="walletAddress">Database: LocalStorage</span>
+            </div>
+        </footer>
+    </main>
+
+    <div id="toast" class="toast hidden">Task Updated!</div>
+
+    <script src="proto_app.js"></script>
+</body>
+</html>
